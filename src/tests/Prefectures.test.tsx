@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Prefectures from '../components/Prefectures';
+import Prefecture from '../components/Prefectures';
 
 test('renders learn react link', () => {
-  render(<Prefectures />);
+  render(<Prefecture />);
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });

@@ -8,8 +8,14 @@
 
 #########################################################################################*/
 
-import React from 'react';
+import * as React from 'react';
+import { fetchPrefectures } from './dataSource';
 import '../stylesheets/components/Prefectures.css';
+
+interface Prefecture {
+  prefCode: number;
+  prefName: string;
+}
 
 function Prefectures() {
   return (
@@ -24,7 +30,7 @@ function Prefectures() {
 function PrefecturesHeader() {
   return (
     <header className="prefectures-header">
-
+      <h1>都道府県</h1>
     </header>
   );
 }
@@ -32,17 +38,25 @@ function PrefecturesHeader() {
 function PrefecturesContent() {
   return (
     <div className="prefectures-content">
-
+      <PrefecturesForm />
     </div>
   );
 }
 
-function PrefecturesFooter() {
-  return (
-    <div className="prefectures-footer">
+function PrefecturesForm() {
+  const [dataList, setDataList] = React.useState<string>('');
 
-    </div>
-  );
+  React.useEffect(() => {
+    fetchPrefectures().then((response: Prefecture[]) => {
+      setDataList(JSON.stringify(response));
+    });
+  });
+
+  return <form>{dataList}</form>;
+}
+
+function PrefecturesFooter() {
+  return <div className="prefectures-footer"></div>;
 }
 
 export default Prefectures;

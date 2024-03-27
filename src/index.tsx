@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './stylesheets/global.css'
+import './stylesheets/global.css';
 import './stylesheets/index.css';
 import Prefectures from './components/Prefectures';
 import Charts from './components/Charts';

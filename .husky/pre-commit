@@ -1,0 +1,2 @@
+npx prettier "src/**/*.{js,jsx,ts,tsx,json,md}" --write
+npx stylelint "**/*.css" --fix

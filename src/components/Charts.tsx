@@ -9,9 +9,30 @@
 #########################################################################################*/
 
 import React from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
-import getPrefecturesData from './datasource';
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
 import '../stylesheets/components/Charts.css';
+import { fetchPopulationCompositionPerYear } from './dataSource';
+
+interface PopulationCompositionPerYear {
+  boundaryYear: number;
+  data: {
+    label: string;
+    data: [
+      {
+        year: number;
+        value: number;
+        rate: number | undefined;
+      },
+    ];
+  };
+}
 
 function Charts() {
   return (
@@ -24,17 +45,23 @@ function Charts() {
 }
 
 function ChartsHeader() {
-  return (
-    <header className="charts-header">
+  const [dataList, setDataList] = React.useState<string>('');
 
-    </header>
-  );
+  React.useEffect(() => {
+    fetchPopulationCompositionPerYear(13).then(
+      (response: PopulationCompositionPerYear) => {
+        setDataList(JSON.stringify(response));
+      },
+    );
+  });
+
+  return <header className="charts-header">{dataList}</header>;
 }
 
 function ChartsContent() {
   return (
     <div className="charts-content">
-      <LineChart width={800} height={500} data={getPrefecturesData}>
+      <LineChart width={800} height={500}>
         <Line type="monotone" dataKey="uv" stroke="#8884d8" />
         <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
         <XAxis dataKey="name" />
@@ -49,9 +76,7 @@ function ChartsFooter() {
   const dataSource = 'testDataSource';
   return (
     <footer className="charts-footer">
-      <p>
-        Data is powered by {dataSource}
-      </p>
+      <p>Data is powered by {dataSource}</p>
     </footer>
   );
 }
