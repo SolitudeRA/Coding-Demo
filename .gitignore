@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -7,6 +5,9 @@
 
 # testing
 /coverage
+
+# build output
+/dist
 
 # production
 /build
@@ -21,3 +22,13 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+# TypeScript
+*.ts.map
+*.d.ts
