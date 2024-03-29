@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './stylesheets/global.css';
 import './stylesheets/index.css';
-import Prefectures from './components/Prefectures';
-import Charts from './components/Charts';
+import App from './components/App';
 import reportWebVitals from './reportWebVitals';
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -12,8 +12,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <Prefectures />
-    <Charts />
+    <App />
   </React.StrictMode>,
 );
 
