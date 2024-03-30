@@ -1,27 +1,122 @@
 .prefectures {
-    text-align: center;
+    padding    : 20px;
+    text-align : center;
 }
 
 .prefectures-header {
-
+    margin-bottom : 20px;
+    font-size     : 24px;
+    color         : #333333;
 }
 
-.prefectures-header h1 {
-
+.prefectures-checkbox-container {
+    display         : grid;
+    justify-content : center;
+    justify-items   : center;
 }
 
-.prefectures-content {
-
+.prefectures-form .prefectures-checkbox {
+    padding       : 10px 20px;
+    margin        : 10px;
+    color         : #000000;
+    cursor        : pointer;
+    background    : rgb(220 220 220 / 50%);
+    border        : 1px solid rgb(44 62 80 / 30%);
+    border-radius : 10px;
+    transition    : all 0.3s ease;
 }
 
-.prefectures-content .prefectures-form {
-
+.prefectures-form .prefectures-checkbox input {
+    cursor : pointer;
 }
 
-.prefectures-content .prefectures-form .prefectures-checkbox {
+.prefectures-form .prefectures-checkbox label {
+    cursor : pointer;
+}
 
+.prefectures-form .prefectures-checkbox:hover {
+    color            : #FFFFFF;
+    background-color : #E74C3C;
+}
+
+.prefectures-form .prefectures-checkbox-checked {
+    color            : #FFFFFF;
+    background-color : #E74C3C;
+}
+
+.prefectures-form .prefectures-form-submit {
+    width            : 200px;
+    height           : 55px;
+    padding          : 10px 20px;
+    margin-top       : 40px;
+    font-size        : 1.2em;
+    color            : #FFFFFF;
+    cursor           : pointer;
+    background-color : rgb(41 128 185 / 70%);
+    border           : none;
+    border-radius    : 10px;
+    transition       : all 0.3s ease;
+}
+
+.prefectures-form .prefectures-form-submit:hover {
+    background-color : #0399FB;
+}
+
+.prefectures-form .prefectures-form-submit:active {
+    background-color : #4B4BDE;
 }
 
 .prefectures-footer {
+    margin-top : 20px;
+    font-size  : 14px;
+    color      : #999999;
+}
+
+/* Small  */
+@media (width <= 768px) {
+    .prefectures-checkbox-container {
+        grid-template-columns : repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .prefectures-content .prefectures-checkbox-container .prefectures-checkbox {
+        width : 90px;
+    }
+}
+
+/* Medium  */
+@media (width >= 768px) {
+    .prefectures-checkbox-container {
+        grid-template-columns : repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .prefectures-content .prefectures-checkbox-container .prefectures-checkbox {
+        width : 100px;
+    }
+}
+
+/* Large  */
+@media (width >= 992px) {
+    .prefectures-checkbox-container {
+        grid-template-columns : repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .prefectures-content .prefectures-checkbox-container .prefectures-checkbox {
+        width : 120px;
+    }
+}
+
+/* Extra large  */
+@media (width >= 1200px) {
+    .prefectures-checkbox-container {
+        grid-template-columns : repeat(auto-fill, 250px);
+    }
+
+    .prefectures-content .prefectures-checkbox-container .prefectures-checkbox {
+        width : 150px;
+    }
+}
+
+/* Extra extra large  */
+@media (width >= 1400px) {
 
 }

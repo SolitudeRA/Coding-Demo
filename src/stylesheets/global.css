@@ -1,3 +1,35 @@
 .global-container {
-    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Medium  */
+@media (width <= 768px) {
+    .global-container {
+        margin: 0 auto;
+    }
+}
+
+/* Large  */
+@media (width >= 992px) {
+    .global-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* Extra large  */
+@media (width >= 1200px) {
+    .global-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+}
+
+/* Extra extra large  */
+@media (width >= 1400px) {
+    .global-container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
 }

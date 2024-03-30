@@ -21,10 +21,12 @@ function App() {
   };
 
   return (
-    <div>
-      <Prefectures selectedPrefecturesList={selectedPrefecturesList}
-                   setSelectedPrefecturesList={setSelectedPrefecturesList}
-                   handleSubmit={handleSubmit} />
+    <div className={'global-container'}>
+      <Prefectures
+        selectedPrefecturesList={selectedPrefecturesList}
+        setSelectedPrefecturesList={setSelectedPrefecturesList}
+        handleSubmit={handleSubmit}
+      />
       <Charts chartRenderingList={chartRenderingList} />
     </div>
   );

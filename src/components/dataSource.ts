@@ -37,14 +37,22 @@ export async function fetchPrefectures() {
 }
 
 // 人口構成データを取得
-export async function fetchPopulationCompositionPerYear(chartRenderingList: Prefecture[], chartDataListOrigin: PopulationCompositionPerYear[], setChartDataListOrigin: Dispatch<SetStateAction<PopulationCompositionPerYear[]>>) {
+export async function fetchPopulationCompositionPerYear(
+  chartRenderingList: Prefecture[],
+  chartDataListOrigin: PopulationCompositionPerYear[],
+  setChartDataListOrigin: Dispatch<
+    SetStateAction<PopulationCompositionPerYear[]>
+  >,
+) {
   const cityCode = '-';
   let lastRequestTime = 0;
   for (const prefecture of chartRenderingList) {
     try {
-      // request rate limiter
+      // Request rate limiter
       if (Date.now() - lastRequestTime < 200) {
-        await new Promise(resolve => setTimeout(resolve, 200 - (Date.now() - lastRequestTime)));
+        await new Promise(resolve =>
+          setTimeout(resolve, 200 - (Date.now() - lastRequestTime)),
+        );
       }
       lastRequestTime = Date.now();
 
@@ -59,7 +67,9 @@ export async function fetchPopulationCompositionPerYear(chartRenderingList: Pref
       );
       response.data.result.prefName = prefecture.prefName;
       response.data.result.prefCode = prefecture.prefCode;
-      chartDataListOrigin = Array.from(chartDataListOrigin).concat([response.data.result]);
+      chartDataListOrigin = Array.from(chartDataListOrigin).concat([
+        response.data.result,
+      ]);
     } catch (error) {
       console.error('API Client Error, unexpected state code.', error);
     }

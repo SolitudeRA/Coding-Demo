@@ -1,20 +1,68 @@
-.charts {
-
+.recharts-responsive-container {
+    margin : auto;
 }
 
-.charts-header {
-
+.custom-tooltip {
+    padding          : 20px;
+    background-color : rgb(245 245 245 / 90%);
+    border           : 1px solid rgb(145 145 145 / 40%);
+    border-radius    : 15px;
 }
 
-.charts-header .charts-selected-prefecture {
-
+.charts-select {
+    display               : flex;
+    grid-template-columns : repeat(auto-fill, minmax(220px, 1fr));
+    gap                   : 50px;
+    align-items           : center;
+    justify-content       : center;
+    margin-top            : 30px;
+    margin-bottom         : 30px;
 }
 
-.charts-content {
-    text-align: center;
+.charts-select .charts-label-select {
+    width         : 200px;
+    padding       : 10px 20px;
+    margin        : 10px;
+    font-size     : 1.2em;
+    cursor        : pointer;
+    border        : 1px solid rgb(44 62 80 / 30%);
+    border-radius : 10px;
+    transition    : all 0.3s ease;
 }
 
+.charts-select .charts-label-selected {
+    color      : #FFFFFF;
+    background : rgb(189 65 235 / 80%);
+}
+
+.charts-select .charts-label-unselect {
+    color      : #FFFFFF;
+    background : rgb(141 144 255 / 70%);
+}
 
 .charts-footer {
+    margin-top : 20px;
+    font-size  : 14px;
+    color      : #999999;
+    text-align : center;
+}
+
+/* Medium  */
+@media (width <= 768px) {
+
+}
+
+/* Large  */
+@media (width >= 992px) {
+
+}
+
+/* Extra large  */
+@media (width >= 1200px) {
+
+}
+
+/* Extra extra large  */
+@media (width >= 1400px) {
 
 }
