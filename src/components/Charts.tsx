@@ -8,15 +8,13 @@
 
 #########################################################################################*/
 
-import React, { FormEventHandler, useEffect, useState } from 'react';
-import { type TooltipProps } from 'recharts';
-import { type ValueType, type NameType } from 'recharts/types/component/DefaultTooltipContent';
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import React, { type FormEventHandler, useEffect, useState } from 'react';
 import '../stylesheets/components/Charts.css';
 import { Prefecture } from './Prefectures';
 import { fetchPopulationCompositionPerYear } from './dataSource';
-import { DATASOURCE } from '../global';
 import { Button } from './PublicControl';
+import { ChartsGraphWrapper } from './ChartsControl';
+import { DATASOURCE } from '../global';
 
 export interface PopulationCompositionPerYear {
   prefName: string;
@@ -36,71 +34,59 @@ export interface PopulationCompositionPerYear {
   ];
 }
 
-interface Metadata {
-  year: number;
-
-  [prefName: string]: number;
-}
-
-interface LabeledMetadata {
-  label: string;
-  data: Metadata[];
-}
-
 interface ChartsProps {
   chartRenderingList: Prefecture[];
 }
 
 function Charts({ chartRenderingList }: ChartsProps) {
+  const [transformedChartDataMap, setTransformedChartDataMap] = useState<Map<string, Metadata[]>>(new Map());
+  const [currentRenderingLabel, setCurrentRenderingLabel] = useState<string>('総人口');
+
+  // chartRenderingListによって、APIからデータを取得、変換
+  useEffect(() => {
+    fetchPopulationCompositionPerYear(chartRenderingList).then((dataList) => {
+      setTransformedChartDataMap(transformData(dataList));
+    });
+  }, [chartRenderingList]);
+
   return (
     <div className={'charts'}>
-      <ChartsContent chartRenderingList={chartRenderingList} />
+      <ChartsHeader
+        labelList={[...transformedChartDataMap.keys()]}
+        state={currentRenderingLabel}
+        setState={setCurrentRenderingLabel}
+      />
+      <ChartsContent
+        chartRenderingList={chartRenderingList}
+        chartRenderingData={transformedChartDataMap.get(currentRenderingLabel)}
+      />
       <ChartsFooter />
     </div>
   );
 }
 
-function ChartsContent({ chartRenderingList }: ChartsProps) {
-  const [originalChartDataList, setOriginalChartDataList] = useState<PopulationCompositionPerYear[]>([]);
-  const [transformedChartDataList, setTransformedChartDataList] = useState<Map<string, Metadata[]>>(new Map());
-  const [currentRenderingLabel, setCurrentRenderingLabel] = useState<string>('総人口');
-  const [colorMap, setColorMap] = useState<Map<number, string>>(new Map());
+interface ChartsHeaderProps {
+  labelList: string[];
+  state: string;
+  setState: React.Dispatch<React.SetStateAction<string>>;
+}
 
-  // chartRenderingListによって、APIからデータを取得
-  useEffect(() => {
-    fetchPopulationCompositionPerYear(
-      chartRenderingList,
-      originalChartDataList,
-      setOriginalChartDataList
-    ).then();
-  }, [chartRenderingList]);
-
-  // APIからのデータの変換
-  useEffect(() => {
-    setTransformedChartDataList(transformData(originalChartDataList));
-  }, [originalChartDataList]);
-
-  // 都道府県コードとカラーの対応関係を作成
-  useEffect(() => {
-    let colorIndex: number = 0;
-    const updatedColorMap = new Map();
-    chartRenderingList.forEach((prefecture: Prefecture) => {
-      updatedColorMap.set(prefecture.prefCode, getChartColor(colorIndex));
-      colorIndex += 1;
-      setColorMap(updatedColorMap);
-    });
-  }, [originalChartDataList]);
-
+// データラベル選択UI
+function ChartsHeader({ labelList, state, setState }: ChartsHeaderProps) {
   const handleLabelClicked: FormEventHandler = event => {
     const target = event.target as HTMLInputElement;
-    setCurrentRenderingLabel(target.name);
+    setState(target.name);
   };
 
-  return (
-    <div className={'charts-content'}>
+  if (labelList.length === 0) {
+    return (
+      <div></div>
+    );
+  } else {
+    return (
       <div className={'charts-select'}>
-        {[...transformedChartDataList.keys()].map((label: string) => {
-          if (label === currentRenderingLabel) {
+        {labelList.map((label: string) => {
+          if (label === state) {
             return (
               <Button
                 name={label}
@@ -123,55 +109,46 @@ function ChartsContent({ chartRenderingList }: ChartsProps) {
           }
         })}
       </div>
-      <div className="charts-display">
-        <ResponsiveContainer width={'95%'} height={800}>
-          <AreaChart data={transformedChartDataList.get(currentRenderingLabel)}>
-            <defs>
-              {chartRenderingList.map((prefecture: Prefecture) => {
-                return (
-                  <linearGradient key={prefecture.prefCode} id={`color-${prefecture.prefCode}`}
-                                  x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="40%" stopColor={colorMap.get(prefecture.prefCode)} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={colorMap.get(prefecture.prefCode)} stopOpacity={0} />
-                  </linearGradient>
-                );
-              })}
-            </defs>
-            <XAxis dataKey="year" />
-            <YAxis width={85} tickFormatter={(value: number) => {
-              if ((Math.floor(value / 10000)) === 0) {
-                return '0';
-              } else {
-                return (Math.floor(value / 10000)) + '\n万人';
-              }
-            }} />
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              layout={'vertical'}
-              align={'right'}
-              verticalAlign={'top'}
-            />
-            {chartRenderingList.map((prefecture: Prefecture) => {
-              return (
-                <Area key={prefecture.prefCode}
-                      type={'natural'}
-                      dot={true}
-                      dataKey={prefecture.prefName}
-                      fillOpacity={0.25}
-                      stroke={colorMap.get(prefecture.prefCode)}
-                      strokeWidth={2}
-                      fill={`url(#color-${prefecture.prefCode})`}
-                />
-              );
-            })}
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+    );
+  }
+}
+
+interface ChartsContentProps {
+  chartRenderingList: Prefecture[];
+  chartRenderingData: Metadata[] | undefined;
+}
+
+function ChartsContent({ chartRenderingList, chartRenderingData }: ChartsContentProps) {
+  const colorPool = ['#3498DB', '#AE801F', '#DA5641', '#1D6647', '#8083E1', '#369DA8', '#7CAD31', '#FCAA44'];
+  const [colorMap, setColorMap] = useState<Map<number, string>>(new Map());
+
+  // 都道府県コードとカラーの対応関係を作成
+  useEffect(() => {
+    let colorIndex: number = 0;
+    const updatedColorMap = new Map();
+    chartRenderingList.forEach((prefecture: Prefecture) => {
+      updatedColorMap.set(prefecture.prefCode, colorPool[colorIndex]);
+      if (colorIndex + 1 > (colorPool.length - 1)) {
+        colorIndex = 0;
+      } else {
+        colorIndex += 1;
+      }
+      setColorMap(updatedColorMap);
+    });
+  }, [chartRenderingList]);
+
+  return (
+    <div className={'charts-content'}>
+      <ChartsGraphWrapper
+        chartRenderingList={chartRenderingList}
+        colorMap={colorMap}
+        chartRenderingData={chartRenderingData}
+      />
     </div>
   );
 }
 
+// Data Sourceの提示
 function ChartsFooter() {
   return (
     <footer className="charts-footer">
@@ -180,34 +157,36 @@ function ChartsFooter() {
   );
 }
 
-const colorPool = [
-  '#3498DB', '#ae801f',
-  '#DA5641', '#2ea271',
-  '#8083E1', '#369DA8',
-  '#B5E074', '#2B3D4F'
-];
+export interface Metadata {
+  year: number;
 
-function getChartColor(colorIndex: number): string {
-  return colorPool[colorIndex];
+  [prefName: string]: number;
 }
 
-// APIから得たをReChartデータへ変換
+interface LabeledMetadata {
+  label: string;
+  data: Metadata[];
+}
+
+// APIから得たをReChartデータへの変換関数
 function transformData(dataArray: PopulationCompositionPerYear[]): Map<string, Metadata[]> {
   const transformedData: LabeledMetadata[] = [];
   const transformedDataMap: Map<string, Metadata[]> = new Map();
 
+  // 都道府県の名前、データを読み込む
   dataArray.forEach(({ prefName, data }) => {
-    data.forEach((dataWithLabel) => {
-      let labeledData = transformedData.find((labeledData) => labeledData.label === dataWithLabel.label);
-
+    data.forEach(dataWithLabel => {
+      // transformedDataでラベルが存在しない場合、新規作成
+      let labeledData = transformedData.find(labeledData => labeledData.label === dataWithLabel.label);
       if (labeledData === undefined) {
         labeledData = { label: dataWithLabel.label, data: [] };
         transformedData.push(labeledData);
       }
 
+      // 各都道府県のデータを、ラベルごとで整理
       dataWithLabel.data.forEach(({ year, value }) => {
-        if (labeledData !== undefined) { // Ensure labeledData is defined
-          let metadata = labeledData.data.find((metadata) => metadata.year === year);
+        if (labeledData !== undefined) {
+          let metadata = labeledData.data.find(metadata => metadata.year === year);
 
           if (metadata === undefined) {
             metadata = { year, [prefName]: value };
@@ -218,42 +197,19 @@ function transformData(dataArray: PopulationCompositionPerYear[]): Map<string, M
         }
       });
 
+      // 各ラベルのデータ年ごと昇順で整理
       if (labeledData !== undefined) {
         labeledData.data.sort((a, b) => b.year - a.year);
       }
     });
   });
 
-  transformedData.forEach((labeledData) => {
+  //transformedData Array を Map に変換
+  transformedData.forEach(labeledData => {
     transformedDataMap.set(labeledData.label, labeledData.data);
   });
 
   return transformedDataMap;
-}
-
-// Tooltipをカスタム（データを降順で表示する）
-function CustomTooltip({ payload, label, active }: TooltipProps<ValueType, NameType>) {
-  if (active && payload && payload.length) {
-    const sortedPayload = [...payload].sort((a, b) => {
-      if (b.value && a.value) {
-        return Number(b.value) - Number(a.value);
-      } else {
-        return 0;
-      }
-    });
-    return (
-      <div className="custom-tooltip">
-        <p className="label">{`${label} 年`}</p>
-        {sortedPayload.map((entry, index) => (
-          <p key={`item-${index}`} style={{ color: entry.color }}>
-            {`${entry.name}: ${entry.value}`}
-          </p>
-        ))}
-      </div>
-    );
-  }
-
-  return null;
 }
 
 export default Charts;

@@ -14,33 +14,32 @@ interface DefaultProps {
 
 export function Button({ name, className, handleFunction, innerText }: DefaultProps) {
   return (
-    <button className={className} name={name} onClick={handleFunction}>{innerText}</button>
+    <button className={className} name={name} onClick={handleFunction}>
+      {innerText}
+    </button>
   );
 }
 
 export function Checkbox({
-                           name,
-                           containerClassname,
-                           controlClassName,
-                           defaultValue,
-                           handleFunction,
-                           labelClassName,
-                           innerText,
-                           handleLabelClick
-                         }: DefaultProps) {
+  name,
+  containerClassname,
+  controlClassName,
+  defaultValue,
+  handleFunction,
+  labelClassName,
+  innerText,
+  handleLabelClick,
+}: DefaultProps) {
   return (
     <div className={containerClassname}>
-      <input type={'checkbox'}
-             className={controlClassName}
-             name={name}
-             defaultValue={defaultValue}
-             onInput={handleFunction}
+      <input
+        type={'checkbox'}
+        className={controlClassName}
+        name={name}
+        defaultValue={defaultValue}
+        onInput={handleFunction}
       />
-      <label
-        className={labelClassName}
-        form={name}
-        onClick={handleLabelClick}
-      >
+      <label className={labelClassName} form={name} onClick={handleLabelClick}>
         {innerText}
       </label>
     </div>

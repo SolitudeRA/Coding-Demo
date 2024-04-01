@@ -34,6 +34,8 @@
 
 - [Behance](https://www.behance.net)
 
+- [Jest Documentation](https://jestjs.io)
+
 - [MIT License](https://opensource.org/license/mit)
 
 ### AIを利用したレポート

@@ -8,14 +8,7 @@
 
 #########################################################################################*/
 
-import {
-  useState,
-  useEffect,
-  type Dispatch,
-  type SetStateAction,
-  type FormEventHandler,
-  type MouseEvent
-} from 'react';
+import { useState, useEffect, type Dispatch, type SetStateAction, type FormEventHandler, type MouseEvent } from 'react';
 import { fetchPrefectures } from './dataSource';
 import '../stylesheets/components/Prefectures.css';
 import { Button, Checkbox } from './PublicControl';
@@ -86,12 +79,12 @@ function PrefecturesContent({
   );
 }
 
-function PrefecturesForm({
-                           prefecturesList,
-                           selectedPrefecturesList,
-                           setSelectedPrefecturesList,
-                           handleSubmit
-                         }: PrefecturesContentProps) {
+export function PrefecturesForm({
+                                  prefecturesList,
+                                  selectedPrefecturesList,
+                                  setSelectedPrefecturesList,
+                                  handleSubmit
+                                }: PrefecturesContentProps) {
   const handleCheckboxChange: FormEventHandler = event => {
     const target = event.target as HTMLInputElement;
     if (target.checked) {
@@ -105,11 +98,9 @@ function PrefecturesForm({
       setSelectedPrefecturesList(selectedPrefecturesList);
     } else {
       const newSelectedPrefecturesList = Array.from(selectedPrefecturesList);
-      selectedPrefecturesList = newSelectedPrefecturesList.filter(
-        (prefecture: Prefecture) => {
-          return prefecture.prefName !== target.name;
-        }
-      );
+      selectedPrefecturesList = newSelectedPrefecturesList.filter((prefecture: Prefecture) => {
+        return prefecture.prefName !== target.name;
+      });
       setSelectedPrefecturesList(selectedPrefecturesList);
     }
   };
@@ -140,6 +131,7 @@ interface CheckBoxContainerProps {
 }
 
 function CheckBoxWrapper({ prefecturesList, selectedPrefecturesList, handleCheckboxChange }: CheckBoxContainerProps) {
+  // Check box container部分のClick eventを対処する
   const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
     if (target.tagName !== 'INPUT') {
@@ -149,7 +141,7 @@ function CheckBoxWrapper({ prefecturesList, selectedPrefecturesList, handleCheck
       }
     }
   };
-
+  // label部分のClick eventを対処する
   const handleLabelClick = (event: MouseEvent<HTMLLabelElement>) => {
     event.preventDefault();
     const checkbox = event.currentTarget.previousSibling as HTMLInputElement;
@@ -159,7 +151,7 @@ function CheckBoxWrapper({ prefecturesList, selectedPrefecturesList, handleCheck
   return (
     <div className={'prefectures-checkbox-container'} onClick={handleContainerClick}>
       {prefecturesList.map((prefecture: Prefecture) => {
-        if (selectedPrefecturesList.find((selectedPrefecture) => prefecture.prefCode === selectedPrefecture.prefCode)) {
+        if (selectedPrefecturesList.find(selectedPrefecture => prefecture.prefCode === selectedPrefecture.prefCode)) {
           return (
             <Checkbox
               name={prefecture.prefName}
