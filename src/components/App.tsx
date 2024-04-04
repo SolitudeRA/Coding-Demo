@@ -8,25 +8,17 @@
 
 #########################################################################################*/
 
-import { useState, type FormEventHandler } from 'react';
+import { useState } from 'react';
 import { Prefecture, Prefectures } from './Prefectures';
 import Charts from './Charts';
 
+// App Component 折れ線グラフで何を表示するか（chartRenderingList）のstateを管理する
 function App() {
-  const [selectedPrefecturesList, setSelectedPrefecturesList] = useState<Prefecture[]>([]);
   const [chartRenderingList, setChartRenderingList] = useState<Prefecture[]>([]);
-
-  const handleSubmit: FormEventHandler = () => {
-    setChartRenderingList(selectedPrefecturesList);
-  };
 
   return (
     <div className={'global-container'}>
-      <Prefectures
-        selectedPrefecturesList={selectedPrefecturesList}
-        setSelectedPrefecturesList={setSelectedPrefecturesList}
-        handleSubmit={handleSubmit}
-      />
+      <Prefectures setChartRenderingList={setChartRenderingList} />
       <Charts chartRenderingList={chartRenderingList} />
     </div>
   );

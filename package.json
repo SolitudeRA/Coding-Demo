@@ -1,6 +1,6 @@
 {
   "name": "yumemi-coding-test",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
@@ -31,6 +31,7 @@
     "@types/react-dom": "18.2.22",
     "@typescript-eslint/eslint-plugin": "7.4.0",
     "@typescript-eslint/parser": "7.4.0",
+    "axios-mock-adapter": "^1.22.0",
     "eslint": "8.57.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-prettier": "9.1.0",
@@ -39,10 +40,16 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.2",
     "prettier": "3.2.5",
+    "resize-observer-polyfill": "^1.5.1",
     "stylelint": "^16.3.1",
     "stylelint-config-recess-order": "^5.0.0",
     "stylelint-config-standard": "36.0.0",
     "typescript": "4.9.5"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/(?!axios).+\\.js$"
+    ]
   },
   "browserslist": {
     "production": [

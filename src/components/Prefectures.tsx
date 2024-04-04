@@ -8,43 +8,84 @@
 
 #########################################################################################*/
 
-import { useState, useEffect, type Dispatch, type SetStateAction, type FormEventHandler, type MouseEvent } from 'react';
+import {
+  useState,
+  useEffect,
+  type Dispatch,
+  type SetStateAction,
+  type FormEventHandler
+} from 'react';
 import { fetchPrefectures } from './dataSource';
 import '../stylesheets/components/Prefectures.css';
-import { Button, Checkbox } from './PublicControl';
+import { Checkbox } from './PrefecturesControl';
+import { type AxiosResponse } from 'axios';
 
 export interface Prefecture {
   prefCode: number;
   prefName: string;
 }
 
+/* ========================================== 都道府県コンポーネント ========================================== */
+
 interface PrefecturesProps {
-  selectedPrefecturesList: Prefecture[];
-  setSelectedPrefecturesList: Dispatch<SetStateAction<Prefecture[]>>;
-  handleSubmit: FormEventHandler;
+  setChartRenderingList: Dispatch<SetStateAction<Prefecture[]>>;
 }
 
-export function Prefectures({ selectedPrefecturesList, setSelectedPrefecturesList, handleSubmit }: PrefecturesProps) {
-  const [prefecturesList, setPrefecturesList] = useState<Prefecture[]>([]);
+export function Prefectures({ setChartRenderingList }: PrefecturesProps) {
 
+  const [prefecturesList, setPrefecturesList] = useState<Prefecture[]>([]);
+  const [fetchingState, setFetchingState] = useState<[string, string]>(['Bad_Request', '']);
+
+  // UI Rendering完成後、APIからprefecturesListを更新
   useEffect(() => {
-    fetchPrefectures().then((response: Prefecture[]) => {
-      setPrefecturesList(response);
+    fetchPrefectures().then((response: AxiosResponse) => {
+      setPrefecturesList(response.data.result);
+      setFetchingState(['Success', '']);
+    }).catch((error) => {
+      if (error.response) {
+        setFetchingState(['Bad_Response', `${error.response.status}`]);
+      } else if (error.code === 'ECONNABORTED') {
+        setFetchingState(['Request_Timeout', '']);
+      } else {
+        setFetchingState(['Bad_Request', '']);
+      }
     });
   }, []);
 
-  return (
-    <div className={'prefectures'}>
-      <PrefecturesHeader />
-      <PrefecturesContent
-        prefecturesList={prefecturesList}
-        selectedPrefecturesList={selectedPrefecturesList}
-        setSelectedPrefecturesList={setSelectedPrefecturesList}
-        handleSubmit={handleSubmit}
-      />
-    </div>
-  );
+  switch (fetchingState[0]) {
+    case 'Success':
+      return (
+        <div className={'prefectures'}>
+          <PrefecturesHeader />
+          <PrefecturesContent
+            prefecturesList={prefecturesList}
+            setChartRenderingList={setChartRenderingList}
+          />
+        </div>
+      );
+    case 'Bad_Response':
+      return (
+        <div className={'prefectures'}>
+          <h2 className={'app-error'}>
+            {`${fetchingState[0]} - ${fetchingState[1]}`}
+          </h2>
+        </div>
+      );
+    case 'Request_Timeout':
+    case 'Bad_Request':
+      return (
+        <div className={'prefectures'}>
+          <h2 className={'app-error'}>
+            {`${fetchingState[0]}`}
+          </h2>
+        </div>
+      );
+  }
+
+  return (<div></div>);
 }
+
+/* ========================================== Header ========================================== */
 
 function PrefecturesHeader() {
   return (
@@ -54,55 +95,30 @@ function PrefecturesHeader() {
   );
 }
 
+/* ========================================== Content ========================================== */
+
 interface PrefecturesContentProps {
   prefecturesList: Prefecture[];
-  selectedPrefecturesList: Prefecture[];
-  setSelectedPrefecturesList: Dispatch<SetStateAction<Prefecture[]>>;
-  handleSubmit: FormEventHandler;
+  setChartRenderingList: Dispatch<SetStateAction<Prefecture[]>>;
 }
 
-function PrefecturesContent({
-                              prefecturesList,
-                              selectedPrefecturesList,
-                              setSelectedPrefecturesList,
-                              handleSubmit
-                            }: PrefecturesContentProps) {
+function PrefecturesContent({ prefecturesList, setChartRenderingList }: PrefecturesContentProps) {
   return (
     <div className={'prefectures-content'}>
-      <PrefecturesForm
-        prefecturesList={prefecturesList}
-        selectedPrefecturesList={selectedPrefecturesList}
-        setSelectedPrefecturesList={setSelectedPrefecturesList}
-        handleSubmit={handleSubmit}
-      />
+      <PrefecturesForm prefecturesList={prefecturesList} setChartRenderingList={setChartRenderingList} />
     </div>
   );
 }
 
-export function PrefecturesForm({
-                                  prefecturesList,
-                                  selectedPrefecturesList,
-                                  setSelectedPrefecturesList,
-                                  handleSubmit
-                                }: PrefecturesContentProps) {
-  const handleCheckboxChange: FormEventHandler = event => {
-    const target = event.target as HTMLInputElement;
-    if (target.checked) {
-      const updatedSelectedPrefecturesList = Array.from(selectedPrefecturesList);
-      selectedPrefecturesList = updatedSelectedPrefecturesList.concat([
-        {
-          prefCode: Number(target.value),
-          prefName: target.name
-        }
-      ]);
-      setSelectedPrefecturesList(selectedPrefecturesList);
-    } else {
-      const newSelectedPrefecturesList = Array.from(selectedPrefecturesList);
-      selectedPrefecturesList = newSelectedPrefecturesList.filter((prefecture: Prefecture) => {
-        return prefecture.prefName !== target.name;
-      });
-      setSelectedPrefecturesList(selectedPrefecturesList);
-    }
+export function PrefecturesForm({ prefecturesList, setChartRenderingList }: PrefecturesContentProps) {
+
+  const [selectedPrefecturesList, setSelectedPrefecturesList] = useState<Prefecture[]>([]);
+
+  const onSubmit: FormEventHandler = () => {
+    setChartRenderingList(selectedPrefecturesList);
+  };
+  const onReset = () => {
+    setSelectedPrefecturesList([]);
   };
 
   return (
@@ -110,15 +126,15 @@ export function PrefecturesForm({
       <CheckBoxWrapper
         prefecturesList={prefecturesList}
         selectedPrefecturesList={selectedPrefecturesList}
-        handleCheckboxChange={handleCheckboxChange}
+        setSelectedPrefecturesList={setSelectedPrefecturesList}
       />
       <div>
-        <Button
-          name={'グラフを表示'}
-          className={'prefectures-form-submit'}
-          handleFunction={handleSubmit}
-          innerText={'グラフを表示'}
-        />
+        <button className={'prefectures-form-submit'} name={'グラフを表示'} onClick={onSubmit}>
+          {'グラフを表示'}
+        </button>
+        <button className={'prefectures-form-reset'} name={'リセット'} onClick={onReset}>
+          {'リセット'}
+        </button>
       </div>
     </div>
   );
@@ -127,59 +143,40 @@ export function PrefecturesForm({
 interface CheckBoxContainerProps {
   prefecturesList: Prefecture[];
   selectedPrefecturesList: Prefecture[];
-  handleCheckboxChange: FormEventHandler;
+  setSelectedPrefecturesList: Dispatch<SetStateAction<Prefecture[]>>;
 }
 
-function CheckBoxWrapper({ prefecturesList, selectedPrefecturesList, handleCheckboxChange }: CheckBoxContainerProps) {
-  // Check box container部分のClick eventを対処する
-  const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLDivElement;
-    if (target.tagName !== 'INPUT') {
-      const checkbox = target.querySelector('input[type="checkbox"]');
-      if (checkbox) {
-        (checkbox as HTMLInputElement).click();
-      }
+function CheckBoxWrapper({ prefecturesList, selectedPrefecturesList, setSelectedPrefecturesList }: CheckBoxContainerProps) {
+
+  const handleCheck = (prefecture: Prefecture) => {
+    let newSelectedPrefecturesList: Prefecture[];
+    if (Boolean(selectedPrefecturesList.find(element => element.prefName === prefecture.prefName))) {
+      newSelectedPrefecturesList = selectedPrefecturesList.filter(element => element.prefName !== prefecture.prefName);
+    } else {
+      newSelectedPrefecturesList = selectedPrefecturesList.concat({
+        prefCode: prefecture.prefCode,
+        prefName: prefecture.prefName
+      });
     }
-  };
-  // label部分のClick eventを対処する
-  const handleLabelClick = (event: MouseEvent<HTMLLabelElement>) => {
-    event.preventDefault();
-    const checkbox = event.currentTarget.previousSibling as HTMLInputElement;
-    checkbox.click();
+    setSelectedPrefecturesList(newSelectedPrefecturesList);
+    console.log(selectedPrefecturesList);
   };
 
   return (
-    <div className={'prefectures-checkbox-container'} onClick={handleContainerClick}>
+    <div className={'prefectures-checkbox-container'}>
       {prefecturesList.map((prefecture: Prefecture) => {
-        if (selectedPrefecturesList.find(selectedPrefecture => prefecture.prefCode === selectedPrefecture.prefCode)) {
-          return (
-            <Checkbox
-              name={prefecture.prefName}
-              containerClassname={'prefectures-checkbox prefectures-checkbox-checked'}
-              controlClassName={''}
-              defaultValue={`${prefecture.prefCode}`}
-              handleFunction={handleCheckboxChange}
-              labelClassName={''}
-              innerText={prefecture.prefName}
-              handleLabelClick={handleLabelClick}
-              key={prefecture.prefCode}
-            />
-          );
-        } else {
-          return (
-            <Checkbox
-              name={prefecture.prefName}
-              containerClassname={'prefectures-checkbox'}
-              controlClassName={''}
-              defaultValue={`${prefecture.prefCode}`}
-              handleFunction={handleCheckboxChange}
-              labelClassName={''}
-              innerText={prefecture.prefName}
-              handleLabelClick={handleLabelClick}
-              key={prefecture.prefCode}
-            />
-          );
-        }
+        return (
+          <Checkbox
+            key={prefecture.prefCode}
+            name={prefecture.prefName}
+            containerClassname={
+              selectedPrefecturesList.find(element => element.prefCode === prefecture.prefCode) ? 'prefectures-checkbox prefectures-checkbox-checked' : 'prefectures-checkbox'
+            }
+            defaultValue={`${prefecture.prefCode}`}
+            onCheck={handleCheck}
+            checked={Boolean(selectedPrefecturesList.find(element => element.prefCode === prefecture.prefCode))}
+          />
+        );
       })}
     </div>
   );

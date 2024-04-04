@@ -11,8 +11,7 @@
 import React, { type FormEventHandler, useEffect, useState } from 'react';
 import '../stylesheets/components/Charts.css';
 import { Prefecture } from './Prefectures';
-import { fetchPopulationCompositionPerYear } from './dataSource';
-import { Button } from './PublicControl';
+import { type Metadata, fetchTransformedPopulationData } from './dataSource';
 import { ChartsGraphWrapper } from './ChartsControl';
 import { DATASOURCE } from '../global';
 
@@ -38,32 +37,70 @@ interface ChartsProps {
   chartRenderingList: Prefecture[];
 }
 
+/* ========================================== 折れ線グラフコンポーネント ========================================== */
+
 function Charts({ chartRenderingList }: ChartsProps) {
   const [transformedChartDataMap, setTransformedChartDataMap] = useState<Map<string, Metadata[]>>(new Map());
   const [currentRenderingLabel, setCurrentRenderingLabel] = useState<string>('総人口');
+  const [fetchingState, setFetchingState] = useState<[string, string]>(['Bad_Request', '']);
 
   // chartRenderingListによって、APIからデータを取得、変換
   useEffect(() => {
-    fetchPopulationCompositionPerYear(chartRenderingList).then((dataList) => {
-      setTransformedChartDataMap(transformData(dataList));
+    fetchTransformedPopulationData(chartRenderingList).then((transformedDataMap) => {
+      setFetchingState(['Success', '']);
+      setTransformedChartDataMap(transformedDataMap);
+    }).catch((error) => {
+      if (error.response) {
+        setFetchingState(['Bad_Response', `${error.response.status}`]);
+      } else if (error.code === 'ECONNABORTED') {
+        setFetchingState(['Request_Timeout', '']);
+      } else {
+        setFetchingState(['Bad_Request', '']);
+      }
     });
   }, [chartRenderingList]);
 
-  return (
-    <div className={'charts'}>
-      <ChartsHeader
-        labelList={[...transformedChartDataMap.keys()]}
-        state={currentRenderingLabel}
-        setState={setCurrentRenderingLabel}
-      />
-      <ChartsContent
-        chartRenderingList={chartRenderingList}
-        chartRenderingData={transformedChartDataMap.get(currentRenderingLabel)}
-      />
-      <ChartsFooter />
-    </div>
-  );
+  switch (fetchingState[0]) {
+    case 'Success':
+      return (
+        <div className={'charts'}>
+          <ChartsHeader
+            labelList={[...transformedChartDataMap.keys()]}
+            state={currentRenderingLabel}
+            setState={setCurrentRenderingLabel}
+          />
+          <ChartsContent
+            chartRenderingList={chartRenderingList}
+            chartRenderingData={transformedChartDataMap.get(currentRenderingLabel)}
+          />
+          <ChartsFooter />
+        </div>
+      );
+    case 'Bad_Response':
+      return (
+        <div className={'charts'}>
+          <h2 className={'app-error'}>
+            {`${fetchingState[0]} - ${fetchingState[1]}`}
+          </h2>
+          <ChartsFooter />
+        </div>
+      );
+    case 'Request_Timeout':
+    case 'Bad_Request':
+      return (
+        <div className={'charts'}>
+          <h2 className={'app-error'}>
+            {`${fetchingState[0]}`}
+          </h2>
+          <ChartsFooter />
+        </div>
+      );
+  }
+
+  return (<div></div>);
 }
+
+/* ========================================== Header ========================================== */
 
 interface ChartsHeaderProps {
   labelList: string[];
@@ -79,32 +116,30 @@ function ChartsHeader({ labelList, state, setState }: ChartsHeaderProps) {
   };
 
   if (labelList.length === 0) {
-    return (
-      <div></div>
-    );
+    return <div></div>;
   } else {
     return (
       <div className={'charts-select'}>
         {labelList.map((label: string) => {
           if (label === state) {
             return (
-              <Button
-                name={label}
-                className={'charts-label-select charts-label-selected'}
-                handleFunction={handleLabelClicked}
-                innerText={label}
+              <button
                 key={label}
-              />
+                className={'charts-label-select charts-label-selected'}
+                name={label}
+                onClick={handleLabelClicked}>
+                {label}
+              </button>
             );
           } else {
             return (
-              <Button
-                name={label}
-                className={'charts-label-select charts-label-unselect'}
-                handleFunction={handleLabelClicked}
-                innerText={label}
+              <button
                 key={label}
-              />
+                className={'charts-label-select charts-label-unselect'}
+                name={label}
+                onClick={handleLabelClicked}>
+                {label}
+              </button>
             );
           }
         })}
@@ -112,6 +147,8 @@ function ChartsHeader({ labelList, state, setState }: ChartsHeaderProps) {
     );
   }
 }
+
+/* ========================================== Content ========================================== */
 
 interface ChartsContentProps {
   chartRenderingList: Prefecture[];
@@ -128,7 +165,7 @@ function ChartsContent({ chartRenderingList, chartRenderingData }: ChartsContent
     const updatedColorMap = new Map();
     chartRenderingList.forEach((prefecture: Prefecture) => {
       updatedColorMap.set(prefecture.prefCode, colorPool[colorIndex]);
-      if (colorIndex + 1 > (colorPool.length - 1)) {
+      if (colorIndex + 1 > colorPool.length - 1) {
         colorIndex = 0;
       } else {
         colorIndex += 1;
@@ -148,68 +185,16 @@ function ChartsContent({ chartRenderingList, chartRenderingData }: ChartsContent
   );
 }
 
+/* ========================================== Footer ========================================== */
+
 // Data Sourceの提示
 function ChartsFooter() {
   return (
     <footer className="charts-footer">
       <p>{`Data from ${DATASOURCE}`}</p>
+      <p>Developed by SolitudeRA</p>
     </footer>
   );
-}
-
-export interface Metadata {
-  year: number;
-
-  [prefName: string]: number;
-}
-
-interface LabeledMetadata {
-  label: string;
-  data: Metadata[];
-}
-
-// APIから得たをReChartデータへの変換関数
-function transformData(dataArray: PopulationCompositionPerYear[]): Map<string, Metadata[]> {
-  const transformedData: LabeledMetadata[] = [];
-  const transformedDataMap: Map<string, Metadata[]> = new Map();
-
-  // 都道府県の名前、データを読み込む
-  dataArray.forEach(({ prefName, data }) => {
-    data.forEach(dataWithLabel => {
-      // transformedDataでラベルが存在しない場合、新規作成
-      let labeledData = transformedData.find(labeledData => labeledData.label === dataWithLabel.label);
-      if (labeledData === undefined) {
-        labeledData = { label: dataWithLabel.label, data: [] };
-        transformedData.push(labeledData);
-      }
-
-      // 各都道府県のデータを、ラベルごとで整理
-      dataWithLabel.data.forEach(({ year, value }) => {
-        if (labeledData !== undefined) {
-          let metadata = labeledData.data.find(metadata => metadata.year === year);
-
-          if (metadata === undefined) {
-            metadata = { year, [prefName]: value };
-            labeledData.data.push(metadata);
-          } else {
-            metadata[prefName] = value;
-          }
-        }
-      });
-
-      // 各ラベルのデータ年ごと昇順で整理
-      if (labeledData !== undefined) {
-        labeledData.data.sort((a, b) => b.year - a.year);
-      }
-    });
-  });
-
-  //transformedData Array を Map に変換
-  transformedData.forEach(labeledData => {
-    transformedDataMap.set(labeledData.label, labeledData.data);
-  });
-
-  return transformedDataMap;
 }
 
 export default Charts;

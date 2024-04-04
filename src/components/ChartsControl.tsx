@@ -1,10 +1,19 @@
+/*#######################################################################################
+
+    折れ線グラフコンポーネント コントロール
+
+    Author: SolitudeRA
+    Github: @SolitudeRA
+    Mail: studio@solitudera.com
+
+#########################################################################################*/
+
 import React from 'react';
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { type TooltipProps } from 'recharts';
 import { type ValueType, type NameType } from 'recharts/types/component/DefaultTooltipContent';
 import { Prefecture } from './Prefectures';
-import { Metadata } from './Charts';
-
+import { Metadata } from './dataSource';
 
 interface ChartsGraphWrapperProps {
   chartRenderingList: Prefecture[];
@@ -23,7 +32,10 @@ export function ChartsGraphWrapper({ chartRenderingList, colorMap, chartRenderin
                 <linearGradient
                   key={prefecture.prefCode}
                   id={`color-${prefecture.prefCode}`}
-                  x1="0" y1="0" x2="0" y2="1"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
                 >
                   <stop offset="40%" stopColor={colorMap.get(prefecture.prefCode)} stopOpacity={0.2} />
                   <stop offset="95%" stopColor={colorMap.get(prefecture.prefCode)} stopOpacity={0} />
