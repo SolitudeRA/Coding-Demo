@@ -46,18 +46,20 @@ function Charts({ chartRenderingList }: ChartsProps) {
 
   // chartRenderingListによって、APIからデータを取得、変換
   useEffect(() => {
-    fetchTransformedPopulationData(chartRenderingList).then((transformedDataMap) => {
-      setFetchingState(['Success', '']);
-      setTransformedChartDataMap(transformedDataMap);
-    }).catch((error) => {
-      if (error.response) {
-        setFetchingState(['Bad_Response', `${error.response.status}`]);
-      } else if (error.code === 'ECONNABORTED') {
-        setFetchingState(['Request_Timeout', '']);
-      } else {
-        setFetchingState(['Bad_Request', '']);
-      }
-    });
+    fetchTransformedPopulationData(chartRenderingList)
+      .then(transformedDataMap => {
+        setFetchingState(['Success', '']);
+        setTransformedChartDataMap(transformedDataMap);
+      })
+      .catch(error => {
+        if (error.response) {
+          setFetchingState(['Bad_Response', `${error.response.status}`]);
+        } else if (error.code === 'ECONNABORTED') {
+          setFetchingState(['Request_Timeout', '']);
+        } else {
+          setFetchingState(['Bad_Request', '']);
+        }
+      });
   }, [chartRenderingList]);
 
   switch (fetchingState[0]) {
@@ -79,9 +81,7 @@ function Charts({ chartRenderingList }: ChartsProps) {
     case 'Bad_Response':
       return (
         <div className={'charts'}>
-          <h2 className={'app-error'}>
-            {`${fetchingState[0]} - ${fetchingState[1]}`}
-          </h2>
+          <h2 className={'app-error'}>{`${fetchingState[0]} - ${fetchingState[1]}`}</h2>
           <ChartsFooter />
         </div>
       );
@@ -89,15 +89,13 @@ function Charts({ chartRenderingList }: ChartsProps) {
     case 'Bad_Request':
       return (
         <div className={'charts'}>
-          <h2 className={'app-error'}>
-            {`${fetchingState[0]}`}
-          </h2>
+          <h2 className={'app-error'}>{`${fetchingState[0]}`}</h2>
           <ChartsFooter />
         </div>
       );
   }
 
-  return (<div></div>);
+  return <div></div>;
 }
 
 /* ========================================== Header ========================================== */
@@ -127,7 +125,8 @@ function ChartsHeader({ labelList, state, setState }: ChartsHeaderProps) {
                 key={label}
                 className={'charts-label-select charts-label-selected'}
                 name={label}
-                onClick={handleLabelClicked}>
+                onClick={handleLabelClicked}
+              >
                 {label}
               </button>
             );
@@ -137,7 +136,8 @@ function ChartsHeader({ labelList, state, setState }: ChartsHeaderProps) {
                 key={label}
                 className={'charts-label-select charts-label-unselect'}
                 name={label}
-                onClick={handleLabelClicked}>
+                onClick={handleLabelClicked}
+              >
                 {label}
               </button>
             );

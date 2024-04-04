@@ -1,10 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
-import {
-  RESAS_API_ENDPOINT,
-  RESAS_API_POPULATION_COMPOSITION_PER_YEAR
-} from '../global';
+import { RESAS_API_ENDPOINT, RESAS_API_POPULATION_COMPOSITION_PER_YEAR } from '../global';
 import { ChartsMockData } from './mock/Charts.test.Mock';
 import { apiClient } from '../components/dataSource';
 import Charts from '../components/Charts';
@@ -17,8 +14,7 @@ describe('折れ線グラフコンポーネント テスト', () => {
   const chartRenderingList: Prefecture[] = [prefectureTokyo];
 
   test('Success', async () => {
-    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`)
-      .reply(200, ChartsMockData);
+    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`).reply(200, ChartsMockData);
     render(<Charts chartRenderingList={chartRenderingList} />);
 
     await waitFor(() => {
@@ -27,8 +23,7 @@ describe('折れ線グラフコンポーネント テスト', () => {
   });
 
   test('Bad_Response', async () => {
-    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`)
-      .reply(404);
+    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`).reply(404);
     render(<Charts chartRenderingList={chartRenderingList} />);
 
     await waitFor(() => {
@@ -37,8 +32,7 @@ describe('折れ線グラフコンポーネント テスト', () => {
   });
 
   test('Request_Timeout', async () => {
-    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`)
-      .timeout();
+    mock.onGet(`${RESAS_API_ENDPOINT}${RESAS_API_POPULATION_COMPOSITION_PER_YEAR}`).timeout();
     render(<Charts chartRenderingList={chartRenderingList} />);
 
     await waitFor(() => {

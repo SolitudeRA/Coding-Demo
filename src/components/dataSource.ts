@@ -11,7 +11,7 @@ import {
   RESAS_API_ENDPOINT,
   RESAS_API_KEY,
   RESAS_API_POPULATION_COMPOSITION_PER_YEAR,
-  RESAS_API_PREFECTURES
+  RESAS_API_PREFECTURES,
 } from '../global';
 import axios, { type AxiosResponse } from 'axios';
 import { type Prefecture } from './Prefectures';
@@ -22,7 +22,7 @@ export const apiClient = axios.create({
   baseURL: RESAS_API_ENDPOINT,
   method: 'GET',
   timeout: 5000,
-  headers: { 'X-API-KEY': RESAS_API_KEY }
+  headers: { 'X-API-KEY': RESAS_API_KEY },
 });
 
 // 都道府県データを取得
@@ -45,8 +45,8 @@ export async function fetchPopulationData(chartRenderingList: Prefecture[]): Pro
     const response = await apiClient.get(RESAS_API_POPULATION_COMPOSITION_PER_YEAR, {
       params: {
         prefCode: prefecture.prefCode,
-        cityCode: cityCode
-      }
+        cityCode: cityCode,
+      },
     });
     response.data.result.prefName = prefecture.prefName;
     response.data.result.prefCode = prefecture.prefCode;
@@ -68,9 +68,11 @@ interface LabeledMetadata {
 }
 
 // APIから得たをReChartデータへの変換関数
-export async function fetchTransformedPopulationData(chartRenderingList: Prefecture[]): Promise<Map<string, Metadata[]>> {
+export async function fetchTransformedPopulationData(
+  chartRenderingList: Prefecture[],
+): Promise<Map<string, Metadata[]>> {
   const resultList: AxiosResponse[] = await fetchPopulationData(chartRenderingList);
-  const dataList: PopulationCompositionPerYear[] = resultList.map((result) => {
+  const dataList: PopulationCompositionPerYear[] = resultList.map(result => {
     return result.data.result;
   });
   const transformedData: LabeledMetadata[] = [];

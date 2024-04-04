@@ -20,14 +20,13 @@ interface CheckboxProps {
 }
 
 export const Checkbox = memo(function Checkbox({
-                                                 name,
-                                                 containerClassname,
-                                                 defaultValue,
-                                                 onCheck,
-                                                 checked
-                                               }: CheckboxProps) {
-
-  const handleClick: MouseEventHandler = (event) => {
+  name,
+  containerClassname,
+  defaultValue,
+  onCheck,
+  checked,
+}: CheckboxProps) {
+  const handleClick: MouseEventHandler = event => {
     event.preventDefault();
     event.stopPropagation();
     checked = !checked;
